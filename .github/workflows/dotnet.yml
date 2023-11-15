@@ -1,0 +1,46 @@
+name: dotnet
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 8.0.x
+    - name: Verify formatting
+      run: dotnet format --verify-no-changes
+    - name: Run tests
+      run: dotnet test
+    - name: Build
+      run: dotnet publish Aoc2023 -r linux-x64  -p:PublishAOT=true -p:AssemblyName=aoc2023 --configuration Release
+    - name: Upload the executable as artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: aoc2023
+        path: Aoc2023/bin/Release/net8.0/linux-x64/publish/aoc2023
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 8.0.x
+      - name: Run tests
+        run: dotnet test
+      - name: Build
+        run: dotnet publish Aoc2023 -r win-x64  -p:PublishAOT=true -p:AssemblyName=aoc2023 --configuration Release
+      - name: Upload the executable as artifact
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: aoc2023
+          path: Aoc2023/bin/Release/net8.0/win-x64/publish/aoc2023.exe
