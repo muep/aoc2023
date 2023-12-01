@@ -5,7 +5,10 @@
 let solutions =
     [ (0,
        { part1 = Aoc2023.Day00.part1
-         part2 = Aoc2023.Day00.part2 }) ]
+         part2 = Aoc2023.Day00.part2 })
+      (1,
+       { part1 = Aoc2023.Day01.part1
+         part2 = Aoc2023.Day01.part2 }) ]
     |> Map.ofList
 
 let runDay inputPath day =
@@ -19,6 +22,7 @@ let runDayDefault day = runDay $"input/day-%02d{day}.txt" day
 
 let runAll () =
     runDayDefault 0
+    runDayDefault 1
 
 let usageText =
     """
