@@ -1,9 +1,9 @@
 ﻿module Aoc2023.Day00
 
-open Xunit
-
 let part1 (_path:string) = box 0
 let part2 (_path:string) = box 0
+
+open Xunit
 
 [<Fact>]
 let ``day 00 part 1`` () =
