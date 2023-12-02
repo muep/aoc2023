@@ -10,25 +10,25 @@ let calibrationValueFromLine line =
     |> UInt32.Parse
 
 let digits =
-    [("0", 0)
-     ("1", 1)
-     ("one", 1)
-     ("2", 2)
-     ("two", 2)
-     ("3", 3)
-     ("three", 3)
-     ("4", 4)
-     ("four", 4)
-     ("5", 5)
-     ("five", 5)
-     ("6", 6)
-     ("six", 6)
-     ("7", 7)
-     ("seven", 7)
-     ("8", 8)
-     ("eight", 8)
-     ("9", 9)
-     ("nine", 9)]
+    [ ("0", 0)
+      ("1", 1)
+      ("one", 1)
+      ("2", 2)
+      ("two", 2)
+      ("3", 3)
+      ("three", 3)
+      ("4", 4)
+      ("four", 4)
+      ("5", 5)
+      ("five", 5)
+      ("6", 6)
+      ("six", 6)
+      ("7", 7)
+      ("seven", 7)
+      ("8", 8)
+      ("eight", 8)
+      ("9", 9)
+      ("nine", 9) ]
 
 let digitFromStringStart (s: string) =
     digits
@@ -50,24 +50,17 @@ let firstDigit (s: string) =
 
 let lastDigit (s: string) =
     seq { for i in 0 .. s.Length -> s.Length - i }
-    |> Seq.map (fun skip -> (s.Substring (0, skip)))
+    |> Seq.map (fun skip -> (s.Substring(0, skip)))
     |> Seq.choose digitFromStringEnd
     |> Seq.head
 
-let firstAndLastDigit (s: string) =
-    (firstDigit s), (lastDigit s)
+let firstAndLastDigit (s: string) = (firstDigit s), (lastDigit s)
 
 let calibrationValueFromLinePart2 line =
-    line
-    |> firstAndLastDigit
-    |> (fun (n0, n1) -> $"{n0}{n1}")
-    |> UInt32.Parse
+    line |> firstAndLastDigit |> (fun (n0, n1) -> $"{n0}{n1}") |> UInt32.Parse
 
 let part1 path =
-    IO.File.ReadLines path
-    |> Seq.map calibrationValueFromLine
-    |> Seq.sum
-    |> box
+    IO.File.ReadLines path |> Seq.map calibrationValueFromLine |> Seq.sum |> box
 
 let part2 path =
     IO.File.ReadLines path
@@ -87,8 +80,7 @@ let ``day 01 part 2`` () =
     Assert.Equal(box 281u, (part2 (__SOURCE_DIRECTORY__ + "/input/day-01-part2.example")))
 
 [<Fact>]
-let ``day 01 part 2 lastDigit`` () =
-    Assert.Equal(9, lastDigit "two1nine")
+let ``day 01 part 2 lastDigit`` () = Assert.Equal(9, lastDigit "two1nine")
 
 [<Fact>]
 let ``day 01 part 2 bits`` () =
