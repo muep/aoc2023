@@ -13,6 +13,11 @@ let isSubsetOf maxSet cubeSet =
       maxSet.green >= cubeSet.green &&
       maxSet.blue >= cubeSet.blue )
 
+let minumumCommonSet set1 set2 =
+    { red = Int32.Max(set1.red, set2.red)
+      green = Int32.Max(set1.green, set2.green)
+      blue = Int32.Max(set1.blue, set2.blue) }
+
 type Game =
     { id: int
       setsOfCubes: SetOfCubes list }
@@ -61,11 +66,24 @@ let part1 path =
     |> Seq.sum
     |> box
 
+let part2 path =
+    IO.File.ReadLines path
+    |> Seq.map (loadGame >>
+                (fun game -> game.setsOfCubes) >>
+                (Seq.fold minumumCommonSet emptySetOfCubes) >>
+                (fun { red = red; green = green; blue = blue } -> red * green * blue))
+    |> Seq.sum
+    |> box
+
 open Xunit
 
 [<Fact>]
 let ``day 02 part 1`` () =
     Assert.Equal(box 8, (part1 (__SOURCE_DIRECTORY__ + "/input/day-02.example")))
+
+[<Fact>]
+let ``day 02 part 2`` () =
+    Assert.Equal(box 2286, (part2 (__SOURCE_DIRECTORY__ + "/input/day-02.example")))
 
 [<Fact>]
 let ``splitFirst basics`` () =

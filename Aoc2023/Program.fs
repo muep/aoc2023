@@ -11,7 +11,7 @@ let solutions =
          part2 = Aoc2023.Day01.part2 })
       (2,
        { part1 = Aoc2023.Day02.part1
-         part2 = (fun _ -> box 0) }) ]
+         part2 = Aoc2023.Day02.part2 }) ]
     |> Map.ofList
 
 let runDay inputPath day =
