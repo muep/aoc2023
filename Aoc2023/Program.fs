@@ -10,8 +10,11 @@ let solutions =
        { part1 = Aoc2023.Day01.part1
          part2 = Aoc2023.Day01.part2 })
       (2,
-       { part1 = Aoc2023.Day02.part1
-         part2 = Aoc2023.Day02.part2 }) ]
+       { part1 = Aoc2023.Day01.part1
+         part2 = Aoc2023.Day01.part2 })
+      (3,
+       { part1 = Aoc2023.Day03.part1
+         part2 = Aoc2023.Day03.part2 }) ]
     |> Map.ofList
 
 let runDay inputPath day =
@@ -44,5 +47,4 @@ let main args =
     | [| "day"; num |] -> num |> System.Int32.Parse |> runDayDefault
     | [| "day"; num; inputPath |] -> num |> System.Int32.Parse |> runDay inputPath
     | _ -> invalidArg $"%A{args}" "Unexpected command line syntax"
-
     0
