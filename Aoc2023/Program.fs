@@ -3,10 +3,7 @@
       part2: string -> obj }
 
 let solutions =
-    [ (0,
-       { part1 = Aoc2023.Day00.part1
-         part2 = Aoc2023.Day00.part2 })
-      (1,
+    [ (1,
        { part1 = Aoc2023.Day01.part1
          part2 = Aoc2023.Day01.part2 })
       (2,
@@ -33,7 +30,6 @@ let runDay inputPath day =
 let runDayDefault day = runDay $"input/day-%02d{day}.txt" day
 
 let runAll () =
-    runDayDefault 0
     runDayDefault 1
     runDayDefault 2
     runDayDefault 3
