@@ -3,29 +3,36 @@
       part2: string -> obj }
 
 let solutions =
-    [ (0,
-       { part1 = Aoc2023.Day00.part1
-         part2 = Aoc2023.Day00.part2 })
-      (1,
+    [ (1,
        { part1 = Aoc2023.Day01.part1
          part2 = Aoc2023.Day01.part2 })
       (2,
-       { part1 = Aoc2023.Day02.part1
-         part2 = Aoc2023.Day02.part2 }) ]
+       { part1 = Aoc2023.Day01.part1
+         part2 = Aoc2023.Day01.part2 })
+      (3,
+       { part1 = Aoc2023.Day03.part1
+         part2 = Aoc2023.Day03.part2 }) ]
     |> Map.ofList
 
 let runDay inputPath day =
+    let stopwatch = System.Diagnostics.Stopwatch()
+    stopwatch.Start()
     let part1Res = solutions.[day].part1 inputPath
-    System.Console.WriteLine $"day-%02d{day} part1: {part1Res}"
+    stopwatch.Stop()
+    System.Console.WriteLine $"day-%02d{day} part1: {part1Res}  ({stopwatch.ElapsedMilliseconds} ms)"
     let part2Res = solutions.[day].part2 inputPath
-    System.Console.WriteLine $"day-%02d{day} part2: {part2Res}"
+    stopwatch.Reset()
+    stopwatch.Start()
+    System.Console.WriteLine $"day-%02d{day} part2: {part2Res} ({stopwatch.ElapsedMilliseconds} ms)"
+    stopwatch.Stop()
     ()
 
 let runDayDefault day = runDay $"input/day-%02d{day}.txt" day
 
 let runAll () =
-    runDayDefault 0
     runDayDefault 1
+    runDayDefault 2
+    runDayDefault 3
 
 let usageText =
     """
