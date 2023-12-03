@@ -69,7 +69,37 @@ let part1 path =
     |> Seq.sumBy (snd >> Int32.Parse)
     |> box
 
-let part2 _path = box 0
+let part2 path =
+    let schematic = loadSchematic path
+
+    let numbersByLocation =
+        seq {
+            for m in Regex.Matches(schematic.data, @"[\d]+") do
+                yield m.Index, m.Value
+        }
+        |> Seq.map (fun (offset, digits) ->
+            let neighbors = adjacents schematic.width offset digits.Length
+            [ for neighbor in neighbors -> neighbor, (offset, digits) ])
+        |> Seq.concat
+        |> Seq.fold
+            (fun m (neighborOffset, (numOffset, digits)) ->
+                let olds =
+                    match Map.tryFind neighborOffset m with
+                    | Some nums -> nums
+                    | _ -> []
+
+                let news = List.append olds [ (numOffset, digits) ]
+                m.Add(neighborOffset, news))
+            Map.empty
+
+    schematic.symbols
+    |> Seq.filter (fun { symbol = s } -> s = '*')
+    |> Seq.choose (fun { offset = symbolOffset } ->
+        match Map.tryFind symbolOffset numbersByLocation with
+        | Some([ (_, num1); (_, num2) ]) -> Some(Int32.Parse(num1) * Int32.Parse(num2))
+        | _ -> None)
+    |> Seq.sum
+    |> box
 
 open Xunit
 
@@ -79,8 +109,7 @@ let ``day 03 part 1`` () =
 
 [<Fact>]
 let ``day 03 part 2`` () =
-    Assert.Equal(box 0, (part2 (__SOURCE_DIRECTORY__ + "/input/day-03.example")))
-
+    Assert.Equal(box 467835, (part2 (__SOURCE_DIRECTORY__ + "/input/day-03.example")))
 
 [<Fact>]
 let ``adjacents mid`` () =
