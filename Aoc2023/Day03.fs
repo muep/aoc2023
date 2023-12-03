@@ -49,48 +49,48 @@ let adjacents width offset length =
 
     Seq.concat [ leftside; mid; rightside ] |> Set.ofSeq
 
+let findAdjacentNumbersByLocation schematic =
+    seq {
+        for m in Regex.Matches(schematic.data, @"[\d]+") do
+            yield m.Index, m.Value
+    }
+    |> Seq.map (fun (offset, digits) ->
+        let neighbors = adjacents schematic.width offset digits.Length
+        [ for neighbor in neighbors -> neighbor, (offset, digits) ])
+    |> Seq.concat
+    |> Seq.fold
+        (fun m (neighborOffset, (numOffset, digits)) ->
+            let olds =
+                match Map.tryFind neighborOffset m with
+                | Some nums -> nums
+                | _ -> []
 
-let hasAdjacentSymbolInSchematic schematic (offset, (digits: string)) =
-    schematic.symbols
-    |> Seq.map (fun s -> s.offset)
-    |> Set.ofSeq
-    |> Set.intersect (adjacents schematic.width offset digits.Length)
+            let news = List.append olds [ (numOffset, digits) ]
+            m.Add(neighborOffset, news))
+        Map.empty
+
+let hasAdjacentSymbolInSchematic symbolPositions width (offset, (digits: string)) =
+    symbolPositions
+    |> Set.intersect (adjacents width offset digits.Length)
     |> Set.isEmpty
     |> not
 
 let part1 path =
     let schematic = loadSchematic path
 
+    let symbolPositions = schematic.symbols |> Seq.map (fun s -> s.offset) |> Set.ofSeq
+
     seq {
         for m in Regex.Matches(schematic.data, @"[\d]+") do
             yield m.Index, m.Value
     }
-    |> Seq.filter (hasAdjacentSymbolInSchematic schematic)
+    |> Seq.filter (hasAdjacentSymbolInSchematic symbolPositions schematic.width)
     |> Seq.sumBy (snd >> Int32.Parse)
     |> box
 
 let part2 path =
     let schematic = loadSchematic path
-
-    let numbersByLocation =
-        seq {
-            for m in Regex.Matches(schematic.data, @"[\d]+") do
-                yield m.Index, m.Value
-        }
-        |> Seq.map (fun (offset, digits) ->
-            let neighbors = adjacents schematic.width offset digits.Length
-            [ for neighbor in neighbors -> neighbor, (offset, digits) ])
-        |> Seq.concat
-        |> Seq.fold
-            (fun m (neighborOffset, (numOffset, digits)) ->
-                let olds =
-                    match Map.tryFind neighborOffset m with
-                    | Some nums -> nums
-                    | _ -> []
-
-                let news = List.append olds [ (numOffset, digits) ]
-                m.Add(neighborOffset, news))
-            Map.empty
+    let numbersByLocation = findAdjacentNumbersByLocation schematic
 
     schematic.symbols
     |> Seq.filter (fun { symbol = s } -> s = '*')
