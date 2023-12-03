@@ -55,4 +55,5 @@ let main args =
     | [| "day"; num |] -> num |> System.Int32.Parse |> runDayDefault
     | [| "day"; num; inputPath |] -> num |> System.Int32.Parse |> runDay inputPath
     | _ -> invalidArg $"%A{args}" "Unexpected command line syntax"
+
     0
