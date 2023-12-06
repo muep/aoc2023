@@ -29,10 +29,7 @@ let cardFromLine line =
     let carIdText, numberText = splitFirst ": " line
 
     let cardId = carIdText.Substring(5) |> Int32.Parse
-    let winningNumbers, ournumbers =
-        numberText
-        |> trim
-        |> getWinningAndWhatWeHave
+    let winningNumbers, ournumbers = numberText |> trim |> getWinningAndWhatWeHave
 
     { id = cardId
       winningNumbers = winningNumbers
@@ -43,8 +40,7 @@ let scoreFromCount count =
     | 0 -> 0
     | n -> 1 <<< (n - 1)
 
-let matchingNumbers { ourNumbers = a; winningNumbers = b } =
-    Set.intersect a b |> Set.count
+let matchingNumbers { ourNumbers = a; winningNumbers = b } = Set.intersect a b |> Set.count
 
 let part1 path =
     IO.File.ReadLines path
@@ -54,9 +50,7 @@ let part1 path =
     |> Seq.sum
     |> box
 
-type CardNode =
-    { id: int
-      breadth: int }
+type CardNode = { id: int; breadth: int }
 
 type State =
     { cardScores: Map<int, int>
@@ -76,8 +70,9 @@ let updateScores (oldsum: int, oldScores: Map<int, int>) currentNode =
 let part2 path =
     IO.File.ReadLines path
     |> Seq.map cardFromLine
-    |> Seq.map (fun card -> { id = card.id
-                              breadth = matchingNumbers card })
+    |> Seq.map (fun card ->
+        { id = card.id
+          breadth = matchingNumbers card })
     |> Seq.toList
     |> List.rev
     |> Seq.fold updateScores (0, Map.empty)
