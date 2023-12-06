@@ -3,7 +3,7 @@
 type foldState =
     { ranges: (uint64 * uint64 * uint64) list
       maps: (uint64 -> uint64) list
-      seeds: uint64 list }
+      seeds: uint64 seq }
 
 let initialState = { ranges = []; maps = []; seeds = [] }
 
@@ -21,17 +21,29 @@ let rangeFromLine (line: string) =
     | [| dst; src; len |] -> (System.UInt64.Parse dst), (System.UInt64.Parse src), (System.UInt64.Parse len)
     | _ -> invalidArg line "Expected three numbers"
 
-let foldLine state (line: string) =
+let part1SeedsFromLine (line: string) =
+    line.Substring(6).Split()
+    |> Array.filter (fun s -> s.Length > 0)
+    |> Array.map System.UInt64.Parse
+    |> Array.toSeq
+
+let part2SeedsFromLine (line: string) =
+    line.Substring(6).Split()
+    |> Array.filter (fun s -> s.Length > 0)
+    |> Array.map System.UInt64.Parse
+    |> Array.chunkBySize 2
+    |> Array.map (fun chunk ->
+        match chunk with
+        | [| start; len |] -> seq { for n in start .. (start + len - 1UL) -> n }
+        | _ -> Seq.empty)
+    |> Seq.concat
+
+let foldLine seedsFromLine state (line: string) =
     match state, line with
     // Initial line
-    | { seeds = [] }, line ->
-        let newSeeds =
-            line.Substring(6).Split()
-            |> Array.filter (fun s -> s.Length > 0)
-            |> Array.map System.UInt64.Parse
-            |> Array.toList
-
-        { state with seeds = newSeeds }
+    | { seeds = seeds }, line when Seq.isEmpty seeds ->
+        { state with
+            seeds = seedsFromLine line }
     // Not yet collecting the names, so they are just ignored
     | { ranges = [] }, line when line.EndsWith("map:") -> state
     // Empty line would otherwise be interesting, but not if nothing
@@ -51,12 +63,18 @@ let foldLine state (line: string) =
 let part1 path =
     let seeds, mapping =
         Seq.concat [ System.IO.File.ReadLines path; [ "" ] ]
-        |> Seq.fold foldLine initialState
+        |> Seq.fold (foldLine part1SeedsFromLine) initialState
         |> (fun { maps = maps; seeds = seeds } -> seeds, Seq.reduce (>>) (List.rev maps))
 
     seeds |> Seq.map mapping |> Seq.min |> box
 
-let part2 _ = box 0
+let part2 path =
+    let seeds, mapping =
+        Seq.concat [ System.IO.File.ReadLines path; [ "" ] ]
+        |> Seq.fold (foldLine part2SeedsFromLine) initialState
+        |> (fun { maps = maps; seeds = seeds } -> seeds, Seq.reduce (>>) (List.rev maps))
+
+    seeds |> Seq.map mapping |> Seq.min |> box
 
 open Xunit
 
@@ -66,7 +84,7 @@ let ``day 05 part 1`` () =
 
 [<Fact>]
 let ``day 05 part 2`` () =
-    Assert.Equal(box 0, (part2 (__SOURCE_DIRECTORY__ + "/input/day-05.example")))
+    Assert.Equal(box 46UL, (part2 (__SOURCE_DIRECTORY__ + "/input/day-05.example")))
 
 [<Fact>]
 let ``funFronRanges basics`` () =
