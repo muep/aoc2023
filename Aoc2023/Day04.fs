@@ -2,6 +2,11 @@
 
 open System
 
+type Card =
+    { id: int
+      winningNumbers: Set<int>
+      ourNumbers: Set<int> }
+
 let splitFirst (sep: string) (s: string) =
     match s.IndexOf sep with
     | -1 -> s, ""
@@ -20,16 +25,69 @@ let getWinningAndWhatWeHave (s: string) =
     | [| winning; got |] -> (nums winning), (nums got)
     | _ -> invalidArg "s" "Expected to have a single pipe"
 
+let cardFromLine line =
+    let carIdText, numberText = splitFirst ": " line
+
+    let cardId = carIdText.Substring(5) |> Int32.Parse
+    let winningNumbers, ournumbers =
+        numberText
+        |> trim
+        |> getWinningAndWhatWeHave
+
+    { id = cardId
+      winningNumbers = winningNumbers
+      ourNumbers = ournumbers }
+
 let scoreFromCount count =
     match count with
     | 0 -> 0
     | n -> 1 <<< (n - 1)
 
+let matchingNumbers { ourNumbers = a; winningNumbers = b } =
+    Set.intersect a b |> Set.count
+
 let part1 path =
     IO.File.ReadLines path
-    |> Seq.map (splitFirst ": " >> snd >> trim >> getWinningAndWhatWeHave)
-    |> Seq.map (fun (a, b) -> Set.intersect a b |> Set.count)
+    |> Seq.map cardFromLine
+    |> Seq.map matchingNumbers
     |> Seq.map scoreFromCount
+    |> Seq.sum
+    |> box
+
+type CardNode =
+    { id: int
+      breadth: int }
+
+type State =
+    { cardScores: Map<int, int>
+      nodeQueue: CardNode seq }
+
+let children { id = id; breadth = breadth } =
+    [ for n in id + 1 .. id + breadth -> n ]
+
+let updateScores (oldScores: Map<int, int>) currentNode =
+    currentNode
+    |> children
+    |> List.map (fun childId -> (Map.find childId oldScores))
+    |> List.sum
+    |> (+) 1
+    |> (fun score -> (Map.add currentNode.id score oldScores))
+
+let part2 path =
+    let cardList =
+        IO.File.ReadLines path
+        |> Seq.map cardFromLine
+        |> Seq.map (fun card -> { id = card.id
+                                  breadth = matchingNumbers card })
+        |> Seq.toList
+        |> List.rev
+
+    let scoreMapping =
+        cardList
+        |> Seq.fold (fun scores card -> updateScores scores card) Map.empty
+
+    cardList
+    |> Seq.map (fun card -> Map.find card.id scoreMapping)
     |> Seq.sum
     |> box
 
@@ -38,3 +96,7 @@ open Xunit
 [<Fact>]
 let ``day 04 part 1`` () =
     Assert.Equal(box 13, (part1 (__SOURCE_DIRECTORY__ + "/input/day-04.example")))
+
+[<Fact>]
+let ``day 04 part 2`` () =
+    Assert.Equal(box 30, (part2 (__SOURCE_DIRECTORY__ + "/input/day-04.example")))
