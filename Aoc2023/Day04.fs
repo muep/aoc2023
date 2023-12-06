@@ -65,30 +65,23 @@ type State =
 let children { id = id; breadth = breadth } =
     [ for n in id + 1 .. id + breadth -> n ]
 
-let updateScores (oldScores: Map<int, int>) currentNode =
+let updateScores (oldsum: int, oldScores: Map<int, int>) currentNode =
     currentNode
     |> children
     |> List.map (fun childId -> (Map.find childId oldScores))
     |> List.sum
     |> (+) 1
-    |> (fun score -> (Map.add currentNode.id score oldScores))
+    |> (fun score -> oldsum + score, (Map.add currentNode.id score oldScores))
 
 let part2 path =
-    let cardList =
-        IO.File.ReadLines path
-        |> Seq.map cardFromLine
-        |> Seq.map (fun card -> { id = card.id
-                                  breadth = matchingNumbers card })
-        |> Seq.toList
-        |> List.rev
-
-    let scoreMapping =
-        cardList
-        |> Seq.fold (fun scores card -> updateScores scores card) Map.empty
-
-    cardList
-    |> Seq.map (fun card -> Map.find card.id scoreMapping)
-    |> Seq.sum
+    IO.File.ReadLines path
+    |> Seq.map cardFromLine
+    |> Seq.map (fun card -> { id = card.id
+                              breadth = matchingNumbers card })
+    |> Seq.toList
+    |> List.rev
+    |> Seq.fold updateScores (0, Map.empty)
+    |> fst
     |> box
 
 open Xunit
