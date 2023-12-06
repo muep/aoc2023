@@ -7,11 +7,14 @@ let solutions =
        { part1 = Aoc2023.Day01.part1
          part2 = Aoc2023.Day01.part2 })
       (2,
-       { part1 = Aoc2023.Day01.part1
-         part2 = Aoc2023.Day01.part2 })
+       { part1 = Aoc2023.Day02.part1
+         part2 = Aoc2023.Day02.part2 })
       (3,
        { part1 = Aoc2023.Day03.part1
-         part2 = Aoc2023.Day03.part2 }) ]
+         part2 = Aoc2023.Day03.part2 })
+      (4,
+       { part1 = Aoc2023.Day04.part1
+         part2 = Aoc2023.Day04.part2 }) ]
     |> Map.ofList
 
 let runDay inputPath day =
@@ -33,6 +36,7 @@ let runAll () =
     runDayDefault 1
     runDayDefault 2
     runDayDefault 3
+    runDayDefault 4
 
 let usageText =
     """
