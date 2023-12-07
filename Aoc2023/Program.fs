@@ -17,7 +17,10 @@ let solutions =
          part2 = Aoc2023.Day04.part2 })
       (5,
        { part1 = Aoc2023.Day05.part1
-         part2 = Aoc2023.Day05.part2 }) ]
+         part2 = Aoc2023.Day05.part2 })
+      (6,
+       { part1 = Aoc2023.Day06.part1
+         part2 = Aoc2023.Day06.part2 }) ]
     |> Map.ofList
 
 let runDay inputPath day =
@@ -26,11 +29,11 @@ let runDay inputPath day =
     let part1Res = solutions.[day].part1 inputPath
     stopwatch.Stop()
     System.Console.WriteLine $"day-%02d{day} part1: {part1Res}  ({stopwatch.ElapsedMilliseconds} ms)"
-    let part2Res = solutions.[day].part2 inputPath
     stopwatch.Reset()
     stopwatch.Start()
-    System.Console.WriteLine $"day-%02d{day} part2: {part2Res} ({stopwatch.ElapsedMilliseconds} ms)"
+    let part2Res = solutions.[day].part2 inputPath
     stopwatch.Stop()
+    System.Console.WriteLine $"day-%02d{day} part2: {part2Res} ({stopwatch.ElapsedMilliseconds} ms)"
     ()
 
 let runDayDefault day = runDay $"input/day-%02d{day}.txt" day
@@ -41,6 +44,7 @@ let runAll () =
     runDayDefault 3
     runDayDefault 4
     runDayDefault 5
+    runDayDefault 6
 
 let usageText =
     """
