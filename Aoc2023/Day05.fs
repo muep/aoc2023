@@ -35,11 +35,7 @@ let foldRanges (ranges: (uint64 * uint64) list) (start: uint64, len: uint64) =
             (start, len) :: (prevStart, prevLen) :: olderRanges
 
 let mergeRanges (ranges: (uint64 * uint64) array) =
-    ranges
-    |> Array.sort
-    |> Seq.fold foldRanges []
-    |> Seq.toArray
-    |> Array.rev
+    ranges |> Array.sort |> Seq.fold foldRanges [] |> Seq.toArray |> Array.rev
 
 let part1SeedsFromLine (line: string) =
     line.Substring(6).Split()
@@ -128,28 +124,28 @@ let ``funFronRanges basics`` () =
 
 [<Fact>]
 let ``mergeRanges basic separate`` () =
-    let input = [|(2UL, 2UL);(5UL, 2UL)|]
-    let expected = [|(2UL, 2UL);(5UL, 2UL)|] |> Seq.toList
+    let input = [| (2UL, 2UL); (5UL, 2UL) |]
+    let expected = [| (2UL, 2UL); (5UL, 2UL) |] |> Seq.toList
     let actual = mergeRanges input |> Seq.toList
     Assert.True(actual.Equals(expected), $"Expected {expected}, got {actual}")
 
 [<Fact>]
 let ``mergeRanges basic sans overlap`` () =
-    let input = [|(0UL, 5UL);(5UL, 5UL)|]
-    let expected = [|(0UL, 10UL)|] |> Seq.toList
+    let input = [| (0UL, 5UL); (5UL, 5UL) |]
+    let expected = [| (0UL, 10UL) |] |> Seq.toList
     let actual = mergeRanges input |> Seq.toList
     Assert.True(actual.Equals(expected), $"Expected {expected}, got {actual}")
 
 [<Fact>]
 let ``mergeRanges basic with overlap`` () =
-    let input = [|(0UL, 5UL);(4UL, 5UL)|]
-    let expected = [|(0UL, 9UL)|] |> Seq.toList
+    let input = [| (0UL, 5UL); (4UL, 5UL) |]
+    let expected = [| (0UL, 9UL) |] |> Seq.toList
     let actual = mergeRanges input |> Seq.toList
     Assert.True(actual.Equals(expected), $"Expected {expected}, got {actual}")
 
 [<Fact>]
 let ``mergeRanges basic with overlap - different offset`` () =
-    let input = [|(1UL, 5UL);(5UL, 5UL)|]
-    let expected = [|(1UL, 9UL)|] |> Seq.toList
+    let input = [| (1UL, 5UL); (5UL, 5UL) |]
+    let expected = [| (1UL, 9UL) |] |> Seq.toList
     let actual = mergeRanges input |> Seq.toList
     Assert.True(actual.Equals(expected), $"Expected {expected}, got {actual}")
