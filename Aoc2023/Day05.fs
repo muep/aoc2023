@@ -1,4 +1,4 @@
-﻿module Aoc2023.Day05
+module Aoc2023.Day05
 
 type foldState =
     { ranges: (uint64 * uint64 * uint64) list

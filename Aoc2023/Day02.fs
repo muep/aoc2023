@@ -1,4 +1,4 @@
-﻿module Aoc2023.Day02
+module Aoc2023.Day02
 
 open System
 

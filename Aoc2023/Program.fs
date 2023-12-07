@@ -1,4 +1,4 @@
-﻿type Solution =
+type Solution =
     { part1: string -> obj
       part2: string -> obj }
 

@@ -1,4 +1,4 @@
-﻿module Aoc2023.Day03
+module Aoc2023.Day03
 
 open System
 open System.Text.RegularExpressions
