@@ -11,32 +11,64 @@ let nums s =
     let _, rest = splitFirst ":" s
     rest.Split() |> Seq.filter notEmpty |> Seq.map System.Int32.Parse
 
-let load path =
+let load1 path =
     match System.IO.File.ReadLines path |> Seq.take 2 |> Seq.toList with
     | [ t; d ] -> Seq.zip (nums t) (nums d)
     | _ -> invalidArg path "Expected two lines"
 
-let dist time chr = chr * (max 0 (time - chr))
+let num s =
+    let _, rest = splitFirst ":" s
+    rest.Replace(" ", "") |> System.Int64.Parse
+
+let load2 path =
+    match System.IO.File.ReadLines path |> Seq.take 2 |> Seq.toList with
+    | [ t; d ] -> (num t), (num d)
+    | _ -> invalidArg path "Expected two lines"
+
+let surplusDist raceTime recordDist chr =
+    -(chr * chr) + (chr * raceTime) - recordDist
+
+let rec lastPositive f startLimit endLimit =
+    if System.Int64.Abs(startLimit - endLimit) = 1 then
+        startLimit
+    else
+        let midpoint = (startLimit + endLimit) / 2L
+
+        if f midpoint <= 0L then
+            lastPositive f startLimit midpoint
+        else
+            lastPositive f midpoint endLimit
 
 let numberOfWinningChoices raceTime recordDistance =
-    seq { for chr in 1 .. (raceTime - 1) -> chr }
-        |> Seq.filter (fun chr -> (dist raceTime chr) > recordDistance)
-        |> Seq.length
+    let midpoint = raceTime / 2L
+    let f = surplusDist raceTime recordDistance
+
+    if f midpoint <= 0 then
+        0L
+    else
+        let lastWin = lastPositive f midpoint raceTime
+        let fstWin = lastPositive f midpoint 0
+        lastWin - fstWin + 1L
 
 let part1 path =
-    load path
+    load1 path
     |> Seq.map (fun (t, d) -> numberOfWinningChoices t d)
     |> Seq.reduce (*)
     |> box
 
-let part2 _ = box 0
+let part2 path =
+    load2 path |> (fun (t, d) -> numberOfWinningChoices t d) |> box
 
 open Xunit
 
 [<Fact>]
 let ``day 06 part 1`` () =
-    Assert.Equal(box 288, (part1 (__SOURCE_DIRECTORY__ + "/input/day-06.example")))
+    Assert.Equal(box 288L, (part1 (__SOURCE_DIRECTORY__ + "/input/day-06.example")))
 
 [<Fact>]
 let ``day 06 part 2`` () =
-    Assert.Equal(box 0, (part2 (__SOURCE_DIRECTORY__ + "/input/day-06.example")))
+    Assert.Equal(box 71503L, (part2 (__SOURCE_DIRECTORY__ + "/input/day-06.example")))
+
+[<Fact>]
+let ``numberOfWinningChoices basics`` () =
+    Assert.Equal(38L, numberOfWinningChoices 55L 401L)
