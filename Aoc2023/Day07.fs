@@ -1,48 +1,47 @@
 module Aoc2023.Day07
 
-type C = C of int
+type Card = Card of int
 
-let loadCard (c: char) =
-    match c with
-    | '2' -> C 2
-    | '3' -> C 3
-    | '4' -> C 4
-    | '5' -> C 5
-    | '6' -> C 6
-    | '7' -> C 7
-    | '8' -> C 8
-    | '9' -> C 9
-    | 'T' -> C 10
-    | 'J' -> C 11
-    | 'Q' -> C 12
-    | 'K' -> C 13
-    | 'A' -> C 14
-    | _ -> invalidArg "c" $"non-card character {c}"
+module Card =
+    let load (c: char) =
+        match c with
+        | '2' -> Card 2
+        | '3' -> Card 3
+        | '4' -> Card 4
+        | '5' -> Card 5
+        | '6' -> Card 6
+        | '7' -> Card 7
+        | '8' -> Card 8
+        | '9' -> Card 9
+        | 'T' -> Card 10
+        | 'J' -> Card 11
+        | 'Q' -> Card 12
+        | 'K' -> Card 13
+        | 'A' -> Card 14
+        | _ -> invalidArg "c" $"non-card character {c}"
 
-let distinct things =
-    things
-    |> Seq.fold
-        (fun counts thing ->
-            match Map.tryFind thing counts with
-            | Some a -> Map.add thing (a + 1) counts
-            | None -> Map.add thing 1 counts)
-        Map.empty
-    |> Map.toList
-    |> List.sortBy (fun (thing, cnt) -> cnt, thing)
-    |> List.rev
+    let addJokers card =
+        match card with
+        | Card 11 -> Card 1
+        | c -> c
+
+    let isJoker card =
+        match card with
+        | Card 1 -> true
+        | _ -> false
 
 type Hand =
-    | HighCard of C array
-    | OnePair of C array
-    | TwoPair of C array
-    | ThreeOfAKind of C array
-    | FullHouse of C array
-    | FourOfAKind of C array
-    | FiveOfAKind of C array
+    | HighCard of Card array
+    | OnePair of Card array
+    | TwoPair of Card array
+    | ThreeOfAKind of Card array
+    | FullHouse of Card array
+    | FourOfAKind of Card array
+    | FiveOfAKind of Card array
 
 module Hand =
-    let ofCards cards =
-        let cardsByCount = distinct cards
+    let basicEval cards =
+        let cardsByCount = Seq.countBy id cards |> List.ofSeq |> List.sortByDescending snd
 
         match cardsByCount with
         | (_, 5) :: _ -> FiveOfAKind cards
@@ -53,27 +52,54 @@ module Hand =
         | (_, 2) :: _ -> OnePair cards
         | _ -> HighCard cards
 
-let loadHand (cardText: string) =
-    [| for c in cardText -> loadCard c |] |> Hand.ofCards
+    let jokerEval cards =
+        let jokers, normalCards = Array.partition Card.isJoker cards
 
-let load path =
+        let cardsByCount =
+            Seq.countBy id normalCards |> List.ofSeq |> List.sortByDescending snd
+
+        match jokers.Length, cardsByCount with
+        | 5, _ -> FiveOfAKind cards
+        | jc, (_, n) :: _ when n + jc >= 5 -> FiveOfAKind cards
+
+        | jc, (_, n) :: _ when n + jc >= 4 -> FourOfAKind cards
+
+        | 0, [ (_, 3); (_, 2) ] -> FullHouse cards
+        | 1, [ (_, 3); (_, 1) ] -> FullHouse cards
+        | 1, [ (_, 2); (_, 2) ] -> FullHouse cards
+
+        | jc, (_, n) :: _ when n + jc >= 3 -> ThreeOfAKind cards
+
+        | 0, (_, 2) :: (_, 2) :: _ -> TwoPair cards
+        | jc, (_, n) :: _ when n + jc >= 2 -> OnePair cards
+        | _ -> HighCard cards
+
+    let load cardRule evalHand (cardText: string) =
+        [| for c in cardText -> Card.load c |] |> Array.map cardRule |> evalHand
+
+let load cardRule evalHand path =
     System.IO.File.ReadLines path
     |> Seq.map (fun line ->
         match line.Split() with
-        | [| cards; bid |] -> loadHand cards, System.UInt64.Parse bid
+        | [| cardText; bid |] -> Hand.load cardRule evalHand cardText, System.UInt64.Parse bid
         | a -> invalidArg "line" $"Expected two items, got {a.Length} of them")
 
-let part1 path =
-    load path
+let part cardRule evalRules path =
+    load cardRule evalRules path
     |> Seq.toList
     |> List.sortBy fst
     |> Seq.indexed
     |> Seq.map (fun (rankMinusOne, t) -> uint64 (rankMinusOne) + 1UL, t)
+    |> Seq.map (fun a ->
+        printfn $"{a}"
+        a)
     |> Seq.map (fun (rank, (_, bid)) -> rank * bid)
     |> Seq.sum
     |> box
 
-let part2 _ = box 0
+let part1 = part id Hand.basicEval
+
+let part2 = part Card.addJokers Hand.jokerEval
 
 open Xunit
 
@@ -83,4 +109,4 @@ let ``day 07 part 1`` () =
 
 [<Fact>]
 let ``day 07 part 2`` () =
-    Assert.Equal(box 0, (part2 (__SOURCE_DIRECTORY__ + "/input/day-07.example")))
+    Assert.Equal(box 5905UL, (part2 (__SOURCE_DIRECTORY__ + "/input/day-07.example")))
